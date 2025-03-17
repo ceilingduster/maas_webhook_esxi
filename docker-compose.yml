@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  esxi-webhook:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - ESXI_HOST=172.16.0.1
+      - ESXI_USER=root
+      - ESXI_PASSWORD=passw0rd
