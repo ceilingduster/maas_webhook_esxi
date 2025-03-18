@@ -14,3 +14,10 @@ Status: http://127.0.0.1:5000/vm/<UUIDHERE>/status
 # Docker Compose
 
 Edit the docker compose and add your environment variables for your ESXi box and run ```with docker compose up -d```.
+
+# But how do I get UUID's?
+
+Edit list.py, add credentials and:
+```
+python3 list.py
+```
