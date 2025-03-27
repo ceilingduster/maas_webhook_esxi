@@ -16,6 +16,24 @@ context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
+def startup():  # list vm's on startup
+    get_vm_uuids()
+
+def get_vm_uuids():
+    # Connect to ESXi
+    si = SmartConnect(host=ESXI_HOST, user=ESXI_USER, pwd=ESXI_PASSWORD, sslContext=context)
+    content = si.RetrieveContent()
+
+    # Get all VMs
+    for child in content.rootFolder.childEntity:
+        if hasattr(child, 'vmFolder'):
+            vm_list = child.vmFolder.childEntity
+            for vm in vm_list:
+                print(f"VM Name: {vm.name} | UUID: {vm.config.instanceUuid}")
+
+    # Disconnect
+    Disconnect(si)
+
 def connect_esxi():
     """Establishes a connection to the ESXi host."""
     return SmartConnect(host=ESXI_HOST, user=ESXI_USER, pwd=ESXI_PASSWORD, sslContext=context)
@@ -55,7 +73,7 @@ def start_vm(uuid):
 
         vm.PowerOn()
         return jsonify({"uuid": uuid, "status": "running", "system_id": system_id})
-    
+
     return jsonify({"error": "VM not found"}), 404
 
 @app.route('/vm/<uuid>/stop', methods=['POST'])
@@ -70,8 +88,9 @@ def stop_vm(uuid):
 
         vm.PowerOff()
         return jsonify({"uuid": uuid, "status": "stopped", "system_id": system_id})
-    
+
     return jsonify({"error": "VM not found"}), 404
 
 if __name__ == '__main__':
+    startup()   # list vm's
     app.run(host='0.0.0.0', port=5000, debug=True)
